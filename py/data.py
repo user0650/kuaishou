@@ -72,6 +72,9 @@ def cluster_photo_visual_data(n_clusters=8):
     model_file = model_cluster_dir + 'model_photo_visual_cluster_' + str(n_clusters)
     out_file = photo_visual_dir + 'photo_visual_cluster_' + str(n_clusters) + '.csv'
 
+    batch_size = 8192
+    X_batch = []
+    id_batch = []
     with open(photo_visual_txt, 'r') as f_in, open(out_file, 'w') as f_out:
         f_out.write('photo_id,cluster_' + str(n_clusters) + '\n')  # 表头
         cls = joblib.load(model_file)
@@ -79,9 +82,21 @@ def cluster_photo_visual_data(n_clusters=8):
             line = line.replace("\n", "")
             row = [float(x) for x in line.split('\t')]
             photo_id = int(row[0])
-            photo_data = [row[1:]]
-            photo_cluster = cls.predict(photo_data)[0]
-            f_out.write(str(photo_id) + ',' + str(photo_cluster) + '\n')
+            photo_data = row[1:]
+            id_batch.append(photo_id)
+            X_batch.append(photo_data)
+            if (num + 1) % batch_size == 0:
+                print('predict: ', num + 1, flush=True)
+                y_batch = cls.predict(X_batch)
+                for i in range(len(id_batch)):
+                    f_out.write(str(id_batch[i]) + ',' + str(y_batch[i]) + '\n')
+                id_batch.clear()
+                X_batch.clear()
+        y_batch = cls.predict(X_batch)
+        for i in range(len(id_batch)):
+            f_out.write(str(id_batch[i]) + ',' + str(y_batch[i]) + '\n')
+        id_batch.clear()
+        X_batch.clear()
 
 
 if __name__ == '__main__':

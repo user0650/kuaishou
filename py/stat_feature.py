@@ -21,26 +21,30 @@
 # duration_time_view_min
 #
 # playing_time_click_sum、duration_time_click_sum
-# playing_time_click_avg、duration_tiem_click_avg
+# playing_time_click_avg、duration_time_click_avg
 # playing_time_click_mode、duration_time_click_mode
 # playing_time_click_max、duration_time_click_max
 # playing_time_click_min、duration_time_click_min
 #
 # playing_time_like_sum、duration_time_like_sum
-# playing_time_like_avg、duration_tiem_like_avg
+# playing_time_like_avg、duration_time_like_avg
 # playing_time_like_mode、duration_time_like_mode
 # playing_time_like_max、duration_time_like_max
 # playing_time_like_min、duration_time_like_min
 #
 # playing_time_follow_sum、duration_time_follow_sum
-# playing_time_follow_avg、duration_tiem_follow_avg
+# playing_time_follow_avg、duration_time_follow_avg
 # playing_time_follow_mode、duration_time_follow_mode
 # playing_time_follow_max、duration_time_follow_max
 # playing_time_follow_min、duration_time_follow_min
 #
 # -- 10*3 + 5 = 35
 
-# 共 105 个特征
+# time_max 用户最早活跃时间
+# time_min 用户最晚活跃时间
+# time_len = 用户活跃时长(time_max - time_min)
+# -- 3
+
 
 import pandas as pd
 import numpy as np
@@ -183,7 +187,7 @@ def export_duration_time_view_sum_feature(df):
     export_stat_feature(df, f_name, stats)
 
 
-# duration_tiem_view_mean
+# duration_time_view_mean
 def export_duration_time_view_mean_feature(df):
     f_name = 'f_duration_time_view_mean'
     stats = df[df['f_photo_type'] > 0].groupby('user_id')['duration_time'].mean()
@@ -391,70 +395,92 @@ def export_duration_time_follow_min_feature(df):
     export_stat_feature(df, f_name, stats)
 
 
+def export_time_max_feature(df):
+    f_name = 'f_time_max'
+    stats = df.groupby('user_id')['time'].max()
+    export_stat_feature(df, f_name, stats)
+
+
+def export_time_min_feature(df):
+    f_name = 'f_time_min'
+    stats = df.groupby('user_id')['time'].min()
+    export_stat_feature(df, f_name, stats)
+
+
+def export_time_len_feature(df):
+    f_name = 'f_time_len'
+    stats = df.groupby('user_id')['time'].max() - df.groupby('user_id')['time'].min()
+    export_stat_feature(df, f_name, stats)
+
+
 def export_features():
     df_interaction = pd.read_csv(in_txt)
 
-    export_view_cn_feature(df_interaction)
-    export_click_cn_feature(df_interaction)
-    export_like_cn_feature(df_interaction)
-    export_follow_cn_feature(df_interaction)
+    export_time_max_feature(df_interaction)
+    export_time_min_feature(df_interaction)
+    export_time_len_feature(df_interaction)
 
-    for t in range(6):
-        export_view_cn_t_feature(df_interaction, t)
-        export_click_cn_t_feature(df_interaction, t)
-        export_like_cn_t_feature(df_interaction, t)
-        export_follow_cn_t_feature(df_interaction, t)
-
-    export_duration_time_view_sum_feature(df_interaction)
-    export_duration_time_view_mean_feature(df_interaction)
-    export_duration_time_view_mid_feature(df_interaction)
-    export_duration_time_view_max_feature(df_interaction)
-    export_duration_time_view_min_feature(df_interaction)
-    export_playing_time_click_sum_feature(df_interaction)
-    export_playing_time_click_mean_feature(df_interaction)
-    export_playing_time_click_mid_feature(df_interaction)
-    export_playing_time_click_max_feature(df_interaction)
-    export_playing_time_click_min_feature(df_interaction)
-    export_duration_time_click_sum_feature(df_interaction)
-    export_duration_time_click_mean_feature(df_interaction)
-    export_duration_time_click_mid_feature(df_interaction)
-    export_duration_time_click_max_feature(df_interaction)
-    export_duration_time_click_min_feature(df_interaction)
-    export_playing_time_like_sum_feature(df_interaction)
-    export_playing_time_like_mean_feature(df_interaction)
-    export_playing_time_like_mid_feature(df_interaction)
-    export_playing_time_like_max_feature(df_interaction)
-    export_playing_time_like_min_feature(df_interaction)
-    export_duration_time_like_sum_feature(df_interaction)
-    export_duration_time_like_mean_feature(df_interaction)
-    export_duration_time_like_mid_feature(df_interaction)
-    export_duration_time_like_max_feature(df_interaction)
-    export_duration_time_like_min_feature(df_interaction)
-    export_playing_time_follow_sum_feature(df_interaction)
-    export_playing_time_follow_mean_feature(df_interaction)
-    export_playing_time_follow_mid_feature(df_interaction)
-    export_playing_time_follow_max_feature(df_interaction)
-    export_playing_time_follow_min_feature(df_interaction)
-    export_duration_time_follow_sum_feature(df_interaction)
-    export_duration_time_follow_mean_feature(df_interaction)
-    export_duration_time_follow_mid_feature(df_interaction)
-    export_duration_time_follow_max_feature(df_interaction)
-    export_duration_time_follow_min_feature(df_interaction)
-
-    export_click_view_rate_feature()
-    export_like_view_rate_feature()
-    export_follow_view_rate_feature()
-    export_like_click_rate_feature()
-    export_follow_click_rate_feature()
-    export_follow_like_rate_feature()
-
-    for t in range(6):
-        export_click_view_rate_t_feature(t)
-        export_like_view_rate_t_feature(t)
-        export_follow_view_rate_t_feature(t)
-        export_like_click_rate_t_feature(t)
-        export_follow_click_rate_t_feature(t)
-        export_follow_like_rate_t_feature(t)
+    # export_view_cn_feature(df_interaction)
+    # export_click_cn_feature(df_interaction)
+    # export_like_cn_feature(df_interaction)
+    # export_follow_cn_feature(df_interaction)
+    # 
+    # for t in range(6):
+    #     export_view_cn_t_feature(df_interaction, t)
+    #     export_click_cn_t_feature(df_interaction, t)
+    #     export_like_cn_t_feature(df_interaction, t)
+    #     export_follow_cn_t_feature(df_interaction, t)
+    # 
+    # export_duration_time_view_sum_feature(df_interaction)
+    # export_duration_time_view_mean_feature(df_interaction)
+    # export_duration_time_view_mid_feature(df_interaction)
+    # export_duration_time_view_max_feature(df_interaction)
+    # export_duration_time_view_min_feature(df_interaction)
+    # export_playing_time_click_sum_feature(df_interaction)
+    # export_playing_time_click_mean_feature(df_interaction)
+    # export_playing_time_click_mid_feature(df_interaction)
+    # export_playing_time_click_max_feature(df_interaction)
+    # export_playing_time_click_min_feature(df_interaction)
+    # export_duration_time_click_sum_feature(df_interaction)
+    # export_duration_time_click_mean_feature(df_interaction)
+    # export_duration_time_click_mid_feature(df_interaction)
+    # export_duration_time_click_max_feature(df_interaction)
+    # export_duration_time_click_min_feature(df_interaction)
+    # export_playing_time_like_sum_feature(df_interaction)
+    # export_playing_time_like_mean_feature(df_interaction)
+    # export_playing_time_like_mid_feature(df_interaction)
+    # export_playing_time_like_max_feature(df_interaction)
+    # export_playing_time_like_min_feature(df_interaction)
+    # export_duration_time_like_sum_feature(df_interaction)
+    # export_duration_time_like_mean_feature(df_interaction)
+    # export_duration_time_like_mid_feature(df_interaction)
+    # export_duration_time_like_max_feature(df_interaction)
+    # export_duration_time_like_min_feature(df_interaction)
+    # export_playing_time_follow_sum_feature(df_interaction)
+    # export_playing_time_follow_mean_feature(df_interaction)
+    # export_playing_time_follow_mid_feature(df_interaction)
+    # export_playing_time_follow_max_feature(df_interaction)
+    # export_playing_time_follow_min_feature(df_interaction)
+    # export_duration_time_follow_sum_feature(df_interaction)
+    # export_duration_time_follow_mean_feature(df_interaction)
+    # export_duration_time_follow_mid_feature(df_interaction)
+    # export_duration_time_follow_max_feature(df_interaction)
+    # export_duration_time_follow_min_feature(df_interaction)
+    # 
+    # export_click_view_rate_feature()
+    # export_like_view_rate_feature()
+    # export_follow_view_rate_feature()
+    # export_like_click_rate_feature()
+    # export_follow_click_rate_feature()
+    # export_follow_like_rate_feature()
+    # 
+    # for t in range(6):
+    #     export_click_view_rate_t_feature(t)
+    #     export_like_view_rate_t_feature(t)
+    #     export_follow_view_rate_t_feature(t)
+    #     export_like_click_rate_t_feature(t)
+    #     export_follow_click_rate_t_feature(t)
+    #     export_follow_like_rate_t_feature(t)
 
 
 def paste_features():
@@ -464,4 +490,4 @@ def paste_features():
 
 if __name__ == '__main__':
     export_features()
-    paste_features()
+    # paste_features()
